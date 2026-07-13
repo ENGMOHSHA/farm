@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>مصاريف المزرعة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div>
+        <h1>مصاريف المزرعة</h1>
+        <p id="welcome-text" class="muted">مرحباً بك</p>
+      </div>
+      <div class="top-actions">
+        <span id="conn-text" class="pill">متصل</span>
+        <button id="logout-btn" class="secondary hidden">خروج</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- شاشة تسجيل الدخول -->
+      <section id="login-screen" class="screen">
+        <div class="card login-card">
+          <h2>تسجيل الدخول</h2>
+          <label>اسم المستخدم</label>
+          <input type="text" id="login-username" autocomplete="username">
+          <label>كلمة السر</label>
+          <input type="password" id="login-password" autocomplete="current-password">
+          <button id="login-btn">دخول</button>
+          <div id="login-error" class="error"></div>
+        </div>
+      </section>
+
+      <!-- شاشة اللوحة الرئيسية -->
+      <section id="dashboard-screen" class="screen hidden">
+
+        <!-- لوحة تحكم الأدمن -->
+        <section id="admin-section" class="role-section hidden">
+          <h2 class="section-title">🛡️ إدارة النظام</h2>
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="admin-groups-tab">المجموعات والشركاء</button>
+            <button class="tab-btn" data-tab="admin-users-tab">إضافة حساب</button>
+            <button class="tab-btn" data-tab="admin-reports-tab">التقارير</button>
+          </div>
+
+          <div id="admin-groups-tab" class="tab active">
+            <div class="card">
+              <label>المجموعة</label>
+              <select id="admin-group-select"></select>
+              
+              <label>اسم المجموعة</label>
+              <input type="text" id="admin-group-name">
+              <label>ملاحظات</label>
+              <input type="text" id="admin-group-notes">
+              
+              <label>تصنيفات المصاريف (اكتب كل تصنيف في سطر منفصل 👇)</label>
+              <textarea id="admin-group-categories" rows="5" placeholder="تصنيف 1&#10;تصنيف 2&#10;تصنيف 3"></textarea>
+              
+              <div class="inline-title">
+                <h4>الشركاء ونسب التحمل</h4>
+                <button type="button" id="add-member-row-btn" class="small">+ شريك</button>
+              </div>
+              <div id="group-members-editor"></div>
+              
+              <button id="save-group-btn">حفظ المجموعة</button>
+              <div id="admin-group-msg" class="success"></div>
+            </div>
+          </div>
+
+          <div id="admin-users-tab" class="tab hidden">
+            <div class="card">
+              <label>الاسم الكامل</label><input type="text" id="admin-user-name">
+              <label>اسم المستخدم</label><input type="text" id="admin-user-username">
+              <label>كلمة المرور</label><input type="text" id="admin-user-password">
+              <label>الدور</label>
+              <select id="admin-user-role">
+                <option value="Payer">Payer (شريك مسدد)</option>
+                <option value="Recorder">Recorder (مسجل)</option>
+                <option value="Admin">Admin (مدير النظام)</option>
+              </select>
+              <button id="save-user-btn">حفظ المستخدم</button>
+              <div id="admin-user-msg" class="success"></div>
+            </div>
+          </div>
+
+          <div id="admin-reports-tab" class="tab hidden">
+            <div class="card">
+              <label>المجموعة</label><select id="admin-report-group"></select>
+              <label>نوع التقرير</label>
+              <select id="admin-report-type">
+                <option value="cats">تصنيفات</option>
+                <option value="details">مصاريف تفصيلية</option>
+              </select>
+              <div class="grid two">
+                <div><label>من تاريخ</label><input type="date" id="admin-report-from"></div>
+                <div><label>إلى تاريخ</label><input type="date" id="admin-report-to"></div>
+              </div>
+              <button id="admin-report-btn">عرض التقرير</button>
+              <div id="admin-report-result" style="margin-top:15px;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- لوحة تحكم المسجل -->
+        <section id="recorder-section" class="role-section hidden">
+          <h2 class="section-title">📝 لوحة المسجل</h2>
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="recorder-add-tab">تسجيل مصروف</button>
+            <button class="tab-btn" data-tab="recorder-payments-tab">اعتماد الحوالات</button>
+            <button class="tab-btn" data-tab="recorder-report-tab">التقرير المالي</button>
+          </div>
+
+          <div id="recorder-add-tab" class="tab active">
+            <div class="card">
+              <label>المجموعة</label><select id="recorder-group"></select>
+              <label>البند / التصنيف</label><select id="recorder-category"></select>
+              <label>المبلغ (ج.م)</label><input type="number" id="recorder-amount" min="0" step="0.01">
+              <label>البيان والتفاصيل</label><textarea id="recorder-desc"></textarea>
+              <button id="recorder-save-expense">حفظ</button>
+            </div>
+            <div class="card" style="margin-top:16px;">
+              <h3>📋 آخر 15 مصروف مسجل</h3>
+              <ul id="recorder-last-expenses" class="summary-list"></ul>
+            </div>
+          </div>
+
+          <div id="recorder-payments-tab" class="tab hidden">
+            <div class="card">
+              <h3>حوالات بانتظار تأكيد الاستلام</h3>
+              <ul id="recorder-payments-list" class="summary-list"></ul>
+            </div>
+          </div>
+
+          <div id="recorder-report-tab" class="tab hidden">
+            <div class="card">
+              <label>المجموعة</label><select id="recorder-report-group"></select>
+              <label>نوع التقرير</label>
+              <select id="recorder-report-type">
+                <option value="cats">تصنيفات</option>
+                <option value="details">مصاريف تفصيلية</option>
+              </select>
+              <div class="grid two">
+                <div><label>من تاريخ</label><input type="date" id="recorder-report-from"></div>
+                <div><label>إلى تاريخ</label><input type="date" id="recorder-report-to"></div>
+              </div>
+              <button id="recorder-report-btn">عرض التقرير</button>
+              <div id="recorder-report-result" style="margin-top:15px;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- لوحة تحكم الشريك المسدد -->
+        <section id="payer-section" class="role-section hidden">
+          <h2 class="section-title">💰 لوحة الشريك المسدد</h2>
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="payer-pending-tab">المصاريف المعلقة</button>
+            <button class="tab-btn" data-tab="payer-last-expenses-tab">آخر 10 مصاريف</button>
+            <button class="tab-btn" data-tab="payer-payments-tab">تسجيل سداد</button>
+            <button class="tab-btn" data-tab="payer-report-tab">التقرير المالي</button>
+          </div>
+
+          <div id="payer-pending-tab" class="tab active">
+            <div class="card">
+              <h3>المصاريف المنتظرة موافقتك</h3>
+              <ul id="payer-pending-list" class="summary-list"></ul>
+            </div>
+          </div>
+
+          <div id="payer-last-expenses-tab" class="tab hidden">
+            <div class="card">
+              <h3>📋 آخر 10 مصاريف</h3>
+              <div class="report-table-wrapper" style="overflow-x: auto; margin-top: 10px;">
+                <table class="report-table" style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr>
+                      <th>البيان</th>
+                      <th>المبلغ</th>
+                      <th>الحالة</th>
+                      <th>حالة السداد</th>
+                      <th>التاريخ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="payer-last-expenses-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div id="payer-payments-tab" class="tab hidden">
+            <div class="card">
+              <label>المجموعة</label><select id="payer-group"></select>
+              <label>المبلغ المدفوع</label><input type="number" id="payer-amount" min="0" step="0.01">
+              <label>السداد عن</label>
+              <select id="payer-beneficiaries" multiple size="4"></select>
+              <label>ملاحظات</label><textarea id="payer-notes"></textarea>
+              <button id="payer-save-payment">حفظ المعاملة</button>
+              <div id="payer-pay-msg" class="success"></div>
+            </div>
+          </div>
+
+          <div id="payer-report-tab" class="tab hidden">
+            <div class="card">
+              <label>المجموعة</label><select id="payer-report-group"></select>
+              <label>نوع التقرير</label>
+              <select id="payer-report-type">
+                <option value="cats">تصنيفات</option>
+                <option value="details">مصاريف تفصيلية</option>
+              </select>
+              <div class="grid two">
+                <div><label>من تاريخ</label><input type="date" id="payer-report-from"></div>
+                <div><label>إلى تاريخ</label><input type="date" id="payer-report-to"></div>
+              </div>
+              <button id="payer-report-btn">عرض التقرير</button>
+              <div id="payer-report-result" style="margin-top:15px;"></div>
+            </div>
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.24/jsrsasign-all-min.js"></script>
+  <script src="app.js?v=sheets_api_v4_complete_turbo"></script>
+</body>
+</html>
